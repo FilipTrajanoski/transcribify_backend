@@ -12,6 +12,7 @@ public interface UserMapper {
     UserDto toUserDto(User user);
 
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "image", ignore = true)
     User signUpToUser(SignUpDto signUpDto);
 
 }

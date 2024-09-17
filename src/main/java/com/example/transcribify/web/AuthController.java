@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 @RequestMapping("/api/v1/auth")
@@ -22,8 +24,13 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> signup(@Valid @RequestBody SignUpDto signUpDto) {
-        UserDto createdUser = authService.signup(signUpDto);
+    public ResponseEntity<UserDto> signup(@Valid @ModelAttribute SignUpDto signUpDto) {
+        UserDto createdUser;
+        try {
+            createdUser = authService.signup(signUpDto);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
         createdUser.setToken(userAuthenticationProvider.createToken(signUpDto.getEmail()));
         return ResponseEntity.ok().body(createdUser);
     }

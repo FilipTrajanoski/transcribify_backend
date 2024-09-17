@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
@@ -20,7 +21,7 @@ public class SignUpDto {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-    private String image;
+    private MultipartFile image;
 
     @NotBlank(message = "Please provide your email")
     @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",

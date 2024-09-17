@@ -8,10 +8,12 @@ import com.example.transcribify.model.dto.UserDto;
 import com.example.transcribify.model.exceptions.AppException;
 import com.example.transcribify.repository.UserRepository;
 import com.example.transcribify.service.AuthService;
+import com.example.transcribify.service.ImageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -20,23 +22,29 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final ImageService imageService;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, ImageService imageService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
+        this.imageService = imageService;
     }
 
     @Override
-    public UserDto signup(SignUpDto signUpDto) {
+    public UserDto signup(SignUpDto signUpDto) throws IOException {
         Optional<User> optionalUser = userRepository.findByEmail(signUpDto.getEmail());
 
         if (optionalUser.isPresent()) {
             throw new AppException("User with that email already exists.", HttpStatus.BAD_REQUEST);
         }
 
+        String imagePath = imageService.saveImage(signUpDto.getImage());
+
+        signUpDto.setImage(null);
         User user = userMapper.signUpToUser(signUpDto);
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
+        user.setImage(imagePath);
 
         User savedUser = userRepository.save(user);
 
