@@ -2,6 +2,7 @@ package com.example.transcribify.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,22 +22,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse,
             FilterChain filterChain) throws ServletException, IOException {
-        String header = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (header != null) {
-            String[] authElements = header.split(" ");
+        String token = null;
+        if (httpServletRequest.getCookies() != null) {
+            for (Cookie cookie : httpServletRequest.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+        }
 
-            if (authElements.length == 2
-                    && "Bearer".equals(authElements[0])) {
+            if (token != null) {
                 try {
                     SecurityContextHolder.getContext().setAuthentication(
-                            userAuthenticationProvider.validateToken(authElements[1]));
+                            userAuthenticationProvider.validateToken(token));
                 } catch (RuntimeException e) {
                     SecurityContextHolder.clearContext();
                     throw e;
                 }
             }
-        }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }

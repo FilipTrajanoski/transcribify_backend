@@ -27,17 +27,22 @@ public class SpeechmaticsService {
         this.restTemplate = restTemplate;
     }
 
-    public String processVideoFile(MultipartFile file, String config) throws IOException {
-        // Prepare the request headers
+    private HttpHeaders setupHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setBearerAuth(speechmaticsApiKey);
 
-        // Prepare the body with the file and other configurations
+        return headers;
+    }
+
+    private MultiValueMap<String, Object> prepareRequestBody(String config) {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("data_file", new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
         body.add("config", config);
 
+        return body;
+    }
+
+    private String prepareRequestSendRequestHandleResponse(MultiValueMap<String, Object> body, HttpHeaders headers) throws IOException {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         // Send the request to Speechmatics API
@@ -52,9 +57,25 @@ public class SpeechmaticsService {
         }
     }
 
-    public String processVideoUrl(String url) {
-        // Similar implementation as processVideoFile, but handling a URL instead
-        return "";
+    public String processVideoFile(MultipartFile file, String config) throws IOException {
+        // Prepare the request headers
+        HttpHeaders headers = setupHttpHeaders();
+
+        // Prepare the body with the file and other configurations
+        MultiValueMap<String, Object> body = prepareRequestBody(config);
+        body.add("data_file", new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
+
+        return prepareRequestSendRequestHandleResponse(body, headers);
+    }
+
+    public String processVideoUrl(String url, String config) throws IOException {
+        // Prepare the request headers
+        HttpHeaders headers = setupHttpHeaders();
+
+        // Prepare the body with the file and other configurations
+        MultiValueMap<String, Object> body = prepareRequestBody(config);
+
+        return prepareRequestSendRequestHandleResponse(body, headers);
     }
 
     public String getVideoJob(String id) {

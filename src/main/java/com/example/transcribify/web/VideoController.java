@@ -30,7 +30,7 @@ public class VideoController {
             if (file != null) {
                 id = speechmaticsService.processVideoFile(file, config);
             } else if (url != null && !url.isEmpty()) {
-                id = speechmaticsService.processVideoUrl(url);
+                id = speechmaticsService.processVideoUrl(url, config);
             } else {
                 return ResponseEntity.badRequest().body("No file or URL provided.");
             }
